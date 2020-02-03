@@ -19,7 +19,7 @@ module.exports = app => {
         });
     };
 
-    this.saveIfexistsTeam = function(obj){
+    this.saveIfNotExistsTeam = function(obj){
         team.findAll({where:{name: obj.fullName}})
         .then((data) => {
             if (data.length > 0){

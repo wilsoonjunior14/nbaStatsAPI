@@ -4,4 +4,4 @@ module.exports = app =>{
 
     app.get("/", indexController.index);
 
-}
+};

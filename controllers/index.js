@@ -8,7 +8,7 @@ module.exports = app =>{
         request("http://data.nba.net/prod/v1/2016/teams.json", (error, response, body) => {
                 let array = JSON.parse(body).league.standard;
                 array.forEach((item)=>{
-                    teamRepository.saveIfexistsTeam(item);
+                    teamRepository.saveIfNotExistsTeam(item);
                 });
 
                 teamRepository.findTeams(res);
