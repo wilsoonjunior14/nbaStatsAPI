@@ -28,9 +28,7 @@ module.exports = app => {
 
     this.searchGames = function(req, res, obj){
         years_games.findAll({include: [
-            {model: teams, as: 'homeTeam', where: {teamId: Sequelize.col('years_games.id_homeTeam')}},
-            {model: teams, as: 'visitantTeam', where: {teamId: Sequelize.col('years_games.id_visitantTeam')}},
-            {model: years, where: {year: obj.year}}
+            'visitantTeam'
         ]})
         .then((data) => {
             if (data.length > 0) return res.json({mensagem: "Games found", status: true, data: data});
@@ -80,7 +78,7 @@ module.exports = app => {
                 gameId: obj.gameId,
                 gameUrlCode: obj.gameUrlCode,
                 isHomeTeam: obj.isHomeTeam,
-                startTimeUTC: new Date(obj.startTimeUTC),
+                startTimeUTC: obj.startTimeUTC.substring(0, 10),
                 nugget: obj.nugget.text,
                 visitantScore: obj.vTeam.score,
                 homeScore: obj.hTeam.score,

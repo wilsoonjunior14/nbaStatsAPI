@@ -19,7 +19,7 @@ module.exports = app => {
         homeScore: {type: Sequelize.STRING}
     });
 
-    years_games.belongsTo(teams, {foreignKey: 'id_visitantTeam'});
+    years_games.belongsTo(teams, {as:'visitantTeam', foreignKey: 'id_visitantTeam'});
     years_games.belongsTo(teams, {foreignKey: 'id_homeTeam'});
     years_games.belongsTo(teams, {foreignKey: 'id_team'});
     years_games.belongsTo(years, {foreignKey: 'id_year'});
