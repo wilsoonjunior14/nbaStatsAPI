@@ -13,7 +13,7 @@ module.exports = app => {
         gameId: {type: Sequelize.STRING},
         gameUrlCode: {type: Sequelize.STRING},
         isHomeTeam: {type: Sequelize.BOOLEAN},
-        startTimeUTC: {type: Sequelize.TIME, allowNull: false},
+        startTimeUTC: {type: Sequelize.DATE, allowNull: false},
         nugget: {type: Sequelize.STRING},
         visitantScore: {type: Sequelize.STRING},
         homeScore: {type: Sequelize.STRING}
@@ -23,5 +23,7 @@ module.exports = app => {
     years_games.belongsTo(teams, {foreignKey: 'id_homeTeam'});
     years_games.belongsTo(teams, {foreignKey: 'id_team'});
     years_games.belongsTo(years, {foreignKey: 'id_year'});
+
+    return years_games;
 
 }

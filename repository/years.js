@@ -1,7 +1,8 @@
 module.exports = app => {
 
+    const Sequelize   = require("sequelize");
     const teams       = app.models.teams;
-    const teams_games = app.models.teams_games;
+    const years_games = app.models.years_games;
     const years       = app.models.years;
 
     this.saveYear = function(obj){
@@ -25,10 +26,79 @@ module.exports = app => {
         });
     };
 
-    this.saveGames = async function(req, res, obj){
-        let yearModel = await years.findOne({where: {year: req.params.id}}).toPromise();
+    this.searchGames = function(req, res, obj){
+        years_games.findAll({include: [
+            {model: teams, as: 'homeTeam', where: {teamId: Sequelize.col('years_games.id_homeTeam')}},
+            {model: teams, as: 'visitantTeam', where: {teamId: Sequelize.col('years_games.id_visitantTeam')}},
+            {model: years, where: {year: obj.year}}
+        ]})
+        .then((data) => {
+            if (data.length > 0) return res.json({mensagem: "Games found", status: true, data: data});
 
-        res.json(yearModel);
+            years.findOne({where: {year: obj.year}})
+            .then((objYear) => {
+                obj.forEach((item) => {
+                    item.id_team = parseInt(obj.idTeam);
+                    item.year    = objYear.id;
+                    this.saveGames(item);
+                });
+            })
+            .catch((err) => {
+                console.log("Cannot search for year. "+obj.year+" "+err);
+            });
+
+            return res.json({mensagem: "Games not found! Please try again", status: false, data: data});
+        })
+        .catch((err) => {
+            res.json({mensagem: "None games found. Please try to reconnect again. "+err, status: false, data: []});
+        });
+    };
+
+    this.saveGames = function(obj){
+        
+        let where = {};
+
+        if (obj.isHomeTeam){
+            obj.id_homeTeam = obj.id_team;
+            where = {teamId: obj.vTeam.teamId};
+        }else{
+            obj.id_visitantTeam = obj.id_team;
+            where = {teamId: obj.hTeam.teamId};
+        }
+
+        teams.findOne({where: where})
+        .then((data) => {
+            if (obj.isHomeTeam){
+                obj.id_visitantTeam = data.id;
+            }else{
+                obj.id_homeTeam     = data.id;
+            }
+
+            years_games.create({
+                seasonStageId: obj.seasonStageId,
+                seasonId: obj.seasonId,
+                gameId: obj.gameId,
+                gameUrlCode: obj.gameUrlCode,
+                isHomeTeam: obj.isHomeTeam,
+                startTimeUTC: new Date(obj.startTimeUTC),
+                nugget: obj.nugget.text,
+                visitantScore: obj.vTeam.score,
+                homeScore: obj.hTeam.score,
+                id_visitantTeam: obj.id_visitantTeam,
+                id_homeTeam: obj.id_homeTeam,
+                id_team: obj.id_team,
+                id_year: obj.year
+            })
+            .then((data) => {
+                console.log("game "+obj.gameId+" was saved");
+            })
+            .catch((err)=> {
+                console.log("game "+obj.gameId+" wasn't saved. "+err);
+            });
+
+        })
+        .catch((err) => {console.log("Error to search for visitant or home team")});
+
     };
 
     return this;

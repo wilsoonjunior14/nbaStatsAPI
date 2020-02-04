@@ -3,12 +3,19 @@ module.exports = app => {
 
     this.searchInformationsTeam = function(req, res){
 
+        const id     = req.params.id;
+        const teamId = req.params.teamId;
+        const year   = req.params.year;
         const yearsRepository = app.repository.years;
 
-        request("http://data.nba.net/prod/v1/2019/teams/1610612747/schedule.json", (error, response, body) => {
+        request("http://data.nba.net/prod/v1/"+year+"/teams/"+teamId+"/schedule.json", (error, response, body) => {
             yearsRepository.saveYearIfNotExists(req, res);
 
-            yearsRepository.saveGames(req, res, body);
+            let obj = JSON.parse(body).league.standard;
+            obj.idTeam = id;
+            obj.year   = year;
+            obj.teamId = teamId;
+            yearsRepository.searchGames(req, res, obj);
         });
 
     };
