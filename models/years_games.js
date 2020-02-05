@@ -20,9 +20,9 @@ module.exports = app => {
     });
 
     years_games.belongsTo(teams, {as:'visitantTeam', foreignKey: 'id_visitantTeam'});
-    years_games.belongsTo(teams, {foreignKey: 'id_homeTeam'});
-    years_games.belongsTo(teams, {foreignKey: 'id_team'});
-    years_games.belongsTo(years, {foreignKey: 'id_year'});
+    years_games.belongsTo(teams, {as: 'homeTeam', foreignKey: 'id_homeTeam'});
+    years_games.belongsTo(teams, {as: 'team', foreignKey: 'id_team'});
+    years_games.belongsTo(years, {as: 'year', foreignKey: 'id_year'});
 
     return years_games;
 
