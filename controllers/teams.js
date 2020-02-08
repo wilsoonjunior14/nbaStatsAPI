@@ -15,11 +15,7 @@ module.exports = app => {
             obj.idTeam = id;
             obj.year   = year;
             obj.teamId = teamId;
-            yearsRepository.deleteGames(obj);
-            
-            setTimeout(()=>{
-                yearsRepository.searchGames(req, res, obj);
-            }, 3000);
+            yearsRepository.deleteAndSaveAndSearchGames(req, res, obj);
         });
 
     };

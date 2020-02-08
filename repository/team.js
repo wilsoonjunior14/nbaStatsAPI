@@ -9,7 +9,7 @@ module.exports = app => {
     };
 
     this.findTeams = function(res){
-        team.findAll()
+        team.findAll({order: [['name', 'ASC']]})
         .then((data) => {
             res.json({mensagem: "Teams found", status: true, data: data});
         })

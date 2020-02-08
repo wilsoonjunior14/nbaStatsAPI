@@ -26,35 +26,43 @@ module.exports = app => {
         });
     };
 
-    this.searchGames = function(req, res, obj){
-        years_games.findAll({include: [
-            'visitantTeam', 'homeTeam', 'team', 'year'
-        ]})
-        .then((data) => {
-            if (data.length > 0) return res.json({mensagem: "Games found", status: true, data: data});
-
-            years.findOne({where: {year: obj.year}})
-            .then((objYear) => {
-                obj.forEach((item) => {
-                    item.id_team = parseInt(obj.idTeam);
-                    item.year    = objYear.id;
-                    this.saveGames(item);
-                });
-
-                setTimeout(()=>{this.findAllGamesForTeam(req, res);}, 8000);
-                
-            })
-            .catch((err) => {
-                console.log("Cannot search for year. "+obj.year+" "+err);
+    this.deleteAndSaveAndSearchGames = function(req, res, obj){
+        years.findOne({where: {year: obj.year}})
+        .then((objYear) => {
+            // delete all games
+            if (objYear.id != undefined) years_games.destroy({where: {id_year: objYear.id, id_team: obj.idTeam}});
+            return objYear;
+        })
+        .then((objYear) => {
+            // save all games
+            obj.forEach( (item) => {
+                item.id_team = parseInt(obj.idTeam);
+                item.year    = objYear.id;
+                this.saveGames(item);
             });
 
-            
+            return objYear;
+        })
+        .then((objYear) => {
+            setTimeout(() => {
+
+                // search all games of team in year
+                years_games.findAll({where: {id_team: obj.idTeam, id_year: objYear.id}, 
+                include: ['visitantTeam', 'homeTeam', 'team', 'year']})
+                .then((data) => {
+                    res.json({mensagem: "Jogos encontrados. ", status: true, data: data});
+                })
+                .catch((err) => {
+                    res.json({mensagem: "Erro ao buscar jogos do time. "+err, status: false, data: []});
+                });
+
+            }, 5000);
 
         })
         .catch((err) => {
-            res.json({mensagem: "None games found. Please try to reconnect again. "+err, status: false, data: []});
+            res.json({mensagem: "Não foi possível buscar os jogos. "+err, status: false, data: []});
         });
-    };
+    }
 
     this.saveGames = function(obj){
         
@@ -101,27 +109,6 @@ module.exports = app => {
         })
         .catch((err) => {console.log("Error to search for visitant or home team")});
 
-    };
-
-    this.deleteGames = function(obj){
-        years.findOne({where: {year: obj.year}})
-        .then((data) => {
-            if (data.id != undefined){
-                years_games.destroy({
-                    where: {id_team: obj.idTeam, id_year: data.id}
-                });
-            }
-        })
-        .catch((err) => {console.log("error to find year "+err)});
-        
-    };
-
-    this.findAllGamesForTeam = function(req, res){
-        years_games.findAll({include: [
-            'visitantTeam', 'homeTeam', 'team', 'year'
-        ]})
-        .then((data) => {res.json({mensagem: "GAMES FOUND! ", status: true, data: data})})
-        .catch((err) => {res.json({mensagem: "None games found. Please try to reconnect again. "+err, status: false, data: []})});
     };
 
     return this;
