@@ -10,7 +10,9 @@ module.exports = app => {
         nickname: {type: Sequelize.STRING},
         conference: {type: Sequelize.STRING},
         division: {type: Sequelize.STRING},
-        logo: {type: Sequelize.STRING}
+        win: {type: Sequelize.INTEGER},
+        loss: {type: Sequelize.INTEGER},
+        winPct: {type: Sequelize.DECIMAL}
     });
 
     return team;

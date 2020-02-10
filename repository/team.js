@@ -9,7 +9,7 @@ module.exports = app => {
     };
 
     this.findTeams = function(res){
-        team.findAll({order: [['name', 'ASC']]})
+        team.findAll({order: [['winPct', 'DESC']]})
         .then((data) => {
             res.json({mensagem: "Teams found", status: true, data: data});
         })
@@ -31,6 +31,16 @@ module.exports = app => {
             }
         })
         .catch((err)=>{console.log(err);});
+    }
+
+    this.updateWinAndLossTeam = function(obj){
+        obj.forEach((item) => {
+            team.findOne({where: {teamId: item.teamId}})
+            .then((teamModel) => {
+                if (teamModel) teamModel.update({win: parseInt(item.win), loss: parseInt(item.loss), winPct: parseFloat(item.winPctV2)}).then(() => {console.log("team updated sucessfully "+teamModel.name)});
+            })
+            .catch((err) => {console.log("error to find team "+err)});
+        });
     }
 
     return this;

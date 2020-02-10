@@ -46,14 +46,23 @@ module.exports = app => {
         .then((objYear) => {
             setTimeout(() => {
 
-                // search all games of team in year
-                years_games.findAll({where: {id_team: obj.idTeam, id_year: objYear.id}, 
-                include: ['visitantTeam', 'homeTeam', 'team', 'year']})
-                .then((data) => {
-                    res.json({mensagem: "Jogos encontrados. ", status: true, data: data});
+                teams.findOne({where: {id: obj.idTeam}})
+                .then((teamModel) => {
+
+                    return teamModel;
                 })
-                .catch((err) => {
-                    res.json({mensagem: "Erro ao buscar jogos do time. "+err, status: false, data: []});
+                .then((teamModel) => {
+
+                    // search all games of team in year
+                    years_games.findAll({where: {id_team: obj.idTeam, id_year: objYear.id}, 
+                        include: ['visitantTeam', 'homeTeam', 'team', 'year']})
+                        .then((data) => {
+                            res.json({mensagem: "Jogos encontrados. ", status: true, data: {team: teamModel, games: data}});
+                        })
+                        .catch((err) => {
+                            res.json({mensagem: "Erro ao buscar jogos do time. "+err, status: false, data: []});
+                        });
+
                 });
 
             }, 5000);

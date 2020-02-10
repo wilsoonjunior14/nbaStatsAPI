@@ -11,7 +11,17 @@ module.exports = app =>{
                     teamRepository.saveIfNotExistsTeam(item);
                 });
 
-                teamRepository.findTeams(res);
+                request("http://data.nba.net/prod/v1/current/standings_all_no_sort_keys.json", (error, response, body) => {
+                    array = JSON.parse(body).league.standard.teams;
+                    teamRepository.updateWinAndLossTeam(array);
+
+                    setTimeout(()=>{
+                        teamRepository.findTeams(res);
+                    }, 3000);
+                    
+                });
+
+                
         });
     };
 
